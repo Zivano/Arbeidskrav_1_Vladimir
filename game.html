@@ -16,7 +16,7 @@
           <!-- healer-health sin vidde må forandres for å endre lifebar -->
           <div class="healthbar healer-health"></div>
           <div class="text-container">
-            <p id="healer-name-txt">Angela</p>
+            <p id="healer-name-txt">Henriette</p>
             <p id="healer-health-txt">400 / 400 HP</p>
           </div>
         </div>
@@ -24,7 +24,7 @@
           <!-- archer-health sin vidde må forandres for å endre lifebar -->
           <div class="healthbar archer-health"></div>
           <div class="text-container">
-            <p id="archer-name-txt">Linn</p>
+            <p id="archer-name-txt">Ariana</p>
             <p id="archer-health-txt">600 / 600 HP</p>
           </div>
         </div>
@@ -32,7 +32,7 @@
           <!-- warrior-health sin vidde må forandres for å endre lifebar -->
           <div class="healthbar warrior-health"></div>
           <div class="text-container">
-            <p id="warrior-name-txt">Xavier</p>
+            <p id="warrior-name-txt">Wyona</p>
             <p id="warrior-health-txt">800 / 800 HP</p>
           </div>
         </div>
@@ -44,7 +44,7 @@
           <!-- dragon-health sin vidde må forandres for å endre lifebar -->
           <div class="healthbar dragon-health"></div>
           <div class="text-container">
-            <p id="dragon-name-txt">Vulcrazo</p>
+            <p id="dragon-name-txt">Daar</p>
             <div class="text-container dragon-health-txt">2000 / 2000 HP</div>
           </div>
         </div>
@@ -106,6 +106,42 @@
         damage: 200,
         alive: true,
       };
+
+//her legger jeg til en kode der hver av heltene får en "sporing/eventlisnter" slikt at vi kan klikke på dem på nettsiden.
+
+      document.querySelector(".healer").addEventListener("click", function(){
+        attackDragon(heroesArray[0]);
+      });
+
+      document.querySelector(".archer").addEventListener("click", function(){
+        attackDragon(heroesArray[1]);
+      });
+
+      document.querySelector(".warrior").addEventListener("click", function(){
+        attackDragon(heroesArray[2]);
+      });
+
+      // Her lager jeg en funksjon som skal vise til angrep fra hero mot dragen, jeg legger til parameteret "hero" som refererer til
+      //heltene som gjør angrepet mot dragen
+
+      function attackDragon(hero) {
+      if (dragonObject.alive){
+        let damage = hero.damage
+
+        //For å se dragens liv etter angrep
+        dragonObject.currentHP -=damage;
+
+        alert(hero.name + " har påført " + damage + " heidundranes skade på " + dragonObject.name);
+      updateDragonHealthText();
+      }
+    }
+     //vi må nå oppdatere dragens health i HTML sånn at vi enkelt kan se hvor mye damage vi har gjort
+       function updateDragonHealthText()  {
+        const {currentHP, maxHP} = dragonObject;
+        //Jeg måtte google meg frem til hvordan kode inn nåværende HP og max hp
+        document.querySelector(".dragon-health-txt").textContent =`${currentHP} /${maxHP} HP`;
+       }
+
     </script>
   </body>
 </html>
