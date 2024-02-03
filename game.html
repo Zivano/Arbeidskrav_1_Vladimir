@@ -69,12 +69,6 @@
       </div>
     </div>
 
-
-
-
-
-
-  
     <script>
       //Denne JS-koden er laget klar for deg. Den trenger du ikke endre på.
 
@@ -90,7 +84,7 @@
         },
         {
           id: 1,
-          name: "Ariana archer",
+          name: "Ariana Archer",
           maxHP: 500,
           currentHP: 500,
           damage: 400,
@@ -106,97 +100,167 @@
         },
       ];
 
+      //la til anger på dragen så den ikke angriper HVER gang noen slår den. dette for å skape en unpredictable følelse i spillet. Mer organisk
+      // Ga dragen 1500 mer HP for å gjøre spillet litt vanskeligere
       let dragonObject = {
         name: "Daar Dragon",
-        maxHP: 2000,
-        currentHP: 2000,
+        maxHP: 3500,
+        currentHP: 3500,
         damage: 200,
         alive: true,
+        anger: 0,
       };
 
+      //her legger jeg til en kode der hver av heltene får en "sporing/eventlisnter" slikt at vi kan klikke på dem på nettsiden.
 
+      document.querySelector(".healer").addEventListener("click", function () {
+        attackDragon(heroesArray[0]);
+      });
 
+      document.querySelector(".archer").addEventListener("click", function () {
+        attackDragon(heroesArray[1]);
+      });
 
+      document.querySelector(".warrior").addEventListener("click", function () {
+        attackDragon(heroesArray[2]);
+      });
 
-      
-
-//her legger jeg til en kode der hver av heltene får en "sporing/EVENTLISTNER" slikt at vi kan klikke på dem på nettsiden.
-
-document.querySelector(".healer").addEventListener("click", function () {
-      attackDragon(heroesArray[0]);
-    });
-
-    document.querySelector(".archer").addEventListener("click", function () {
-      attackDragon(heroesArray[1]);
-    });
-
-    document.querySelector(".warrior").addEventListener("click", function () {
-      attackDragon(heroesArray[2]);
-    });
-      // HERO ATTACK DRAGON
       // Her lager jeg en funksjon som skal vise til angrep fra hero mot dragen, jeg legger til parameteret "hero" som refererer til
       //heltene som gjør angrepet mot dragen
 
       function attackDragon(hero) {
-      if (dragonObject.alive) {
-        let damage = hero.damage;
-        // Oppdaterer dragens liv etter angrep
-        dragonObject.currentHP -= damage;
-//    ALERT FUNKSJON
-        alert(hero.name + " har påført " + damage + " skade på " + dragonObject.name);
-        updateDragonHealthText();
+        //sjekker om helten din lever
+        if (hero.alive) {
+          if (dragonObject.alive) {
+            let damage = hero.damage;
 
-        // Dragen angriper en tilfeldig helt etter heltens angrep
-        setTimeout(dragonAttack, 1000);
-      }
-    }
-    // Oppdaterer dragens helse i HTML
-    function updateDragonHealthText() {
-      const { currentHP, maxHP } = dragonObject;
-      document.querySelector(".dragon-health-txt").textContent = `${currentHP} / ${maxHP} HP`;
-    }
-    
-    // Funksjon for dragens angrep mot en tilfeldig helt
-    function dragonAttack() {
-      if (dragonObject.alive) {
-        let randomHero = getRandomAliveHero();
+            //For å se dragens liv etter angrep
+            dragonObject.currentHP -= damage;
 
-        if (randomHero !== null) {
-          let damage = dragonObject.damage;
-          randomHero.currentHP -= damage;
+            //Dragen får 0-3 anger hver gang den blir angrepet for å gjøre spillet litt mindre forutsigbart.
+            dragonObject.anger += Math.floor(Math.random() * 4);
 
-          alert(dragonObject.name + " har angrepet " + randomHero.name + "!");
-          updateHeroHealthText(randomHero.id);
+            alert(
+              hero.name +
+                " har påført " +
+                damage +
+                " heidundranes skade på " +
+                dragonObject.name
+            );
 
-          if (randomHero.currentHP <= 0) {
-            randomHero.alive = false;
-            alert(randomHero.name + " er beseiret av " + dragonObject.name + "!");
+            //sender dragon inn i update entity text funksjonen.
+            updateEntityHealthText(dragonObject);
+
+            //Dragen angriper om den fortsatt er i live, og har 3 eller mer anger. Om dragen angriper settes anger til 0.
+            if (dragonObject.currentHP > 0 && dragonObject.anger >= 1) {
+              dragonAttack(dragonObject);
+              dragonObject.anger = 0;
+            }
           }
+        } else {
+          alert("Helten er død, velg en annen!");
         }
       }
-    }
-    
+      //vi må nå oppdatere dragens health i HTML sånn at vi enkelt kan se hvor mye damage vi har gjort
+      /*function updateDragonHealthText()  {
+     const {currentHP, maxHP} = dragonObject;
+     //Jeg måtte google meg frem til hvordan kode inn nåværende HP og max hp
+     document.querySelector(".dragon-health-txt").textContent =`${currentHP} /${maxHP} HP`;
+    }*/
 
-    // Hjelpefunksjon for å oppdatere en helt sin helse i HTML
-    function updateHeroHealthText(heroId) {
-      const { currentHP, maxHP } = heroesArray[heroId];
-      document.querySelector(`#${heroesArray[heroId].name.toLowerCase()}-health-txt`).textContent = `${currentHP} / ${maxHP} HP`;
-    }
+      //Endret funksjonen for å oppdatere health til å fungere for både heroes og dragen.
+      function updateEntityHealthText(unit) {
+        const { currentHP, maxHP, name } = unit;
 
-    // Hjelpefunksjon for å sjekke om en helt er i live
-    function isHeroAlive(hero) {
-      return hero.alive && hero.currentHP > 0;
-    }
+        //sjekker hvem som har tatt skaden
+        switch (name) {
+          case "Henriette Healer":
+            healthTextSelector = "#healer-health-txt";
+            break;
+          case "Ariana Archer":
+            healthTextSelector = "#archer-health-txt";
+            break;
+          case "Wyona Warrior":
+            healthTextSelector = "#warrior-health-txt";
+            break;
+          case "Daar Dragon":
+            healthTextSelector = ".dragon-health-txt";
+            break;
 
-    // Hjelpefunksjon for å få en tilfeldig, levende helt
-    function getRandomAliveHero() {
-      let aliveHeroes = heroesArray.filter(isHeroAlive);
-      if (aliveHeroes.length > 0) {
-        let randomIndex = Math.floor(Math.random() * aliveHeroes.length);
-        return aliveHeroes[randomIndex];
+          //Forlater funksjonen on unit ikke finnes.
+          default:
+            alert("Unit finnes ikke");
+            return;
+        }
+
+        document.querySelector(
+          healthTextSelector
+        ).textContent = `${currentHP} / ${maxHP} HP`;
       }
-      return null;
-    }
+
+      //Jeg måtte oppdatere denne for at spillet skulle sjekke om heltene var døde.
+      function dragonAttack(dragon) {
+        //Dragen velger tilfeldig target fra hero array;
+        let dragonTarget = Math.floor(Math.random() * 3);
+
+        //sjekker om target lever, om target er død velger vi på nytt.
+        if (heroesArray[dragonTarget].alive) {
+          heroesArray[dragonTarget].currentHP -= dragonObject.damage;
+
+          //sette status til død om helten går tom for liv
+          if (heroesArray[dragonTarget].currentHP <= 0) {
+            heroesArray[dragonTarget].alive = false;
+            heroesArray[dragonTarget].currentHP = 0;
+
+            // Fjerner helten fra nettleseren
+            //koden under ville ikke fjerne hero etter at den har blitt slått. brukte lang tid til å forstå at jeg måtte ha
+            //(' ')[1].toLowerCase()}`) og ikke (' ')[0].toLowerCase()}`)
+            // lagde jeg i praksis et array, så det inni [] bestemmer hvilken index jeg skal beholde
+
+
+
+            document.querySelector(
+              `.${heroesArray[dragonTarget].name.split(" ")[1].toLowerCase()}`
+            ).remove();
+          }
+        } else {
+          dragonAttack(dragon);
+        }
+
+        alert(
+          dragon.name +
+            " har påført " +
+            dragon.damage +
+            " heidundranes skade på " +
+            heroesArray[dragonTarget].name
+        );
+
+        // Sender dragontarget inn i update entity text funksjonen som linker til koden som
+        //skal oppdatere om helter er levende eller ikke.
+        updateEntityHealthText(heroesArray[dragonTarget]);
+
+        // Sjekker om alle heltene er døde
+        //const allHeroesDead = heroesArray.every((hero) => !hero.alive);
+       // if (allHeroesDead) {
+          // Viser en alert når alle heltene er døde
+        //  alert("Alle heltene er døde!");
+       // }
+
+        // Etter dragens angrep, sjekk spilletstatus
+        checkGameStatus();
+      }
+
+      // Lage en alert når alle heltene er død
+
+      function checkGameStatus() {
+        // Sjekk om spillet er tapt
+        if (
+          dragonObject.currentHP > 0 &&
+          heroesArray.every((hero) => !hero.alive)
+        ) {
+          alert("Spillet er tapt! " + dragonObject.name + " har vunnet!");
+        }
+      }
     </script>
   </body>
 </html>
